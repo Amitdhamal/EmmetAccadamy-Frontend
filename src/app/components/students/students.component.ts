@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { DataService } from '../../services/data.service';
@@ -12,7 +12,7 @@ import { Student } from '../../models/models';
   templateUrl: './students.component.html',
   styleUrls: ['./students.component.scss']
 })
-export class StudentsComponent {
+export class StudentsComponent  implements OnDestroy{
   data = inject(DataService);
   toast = inject(ToastService);
   fb = inject(FormBuilder);
@@ -28,14 +28,14 @@ export class StudentsComponent {
   studentForm = this.fb.group({
     name: ['', Validators.required],
     email: ['', [Validators.required, Validators.email]],
-    phone: [''],
+    phone: ['', Validators.required],
     course: ['', Validators.required],
     batch: ['', Validators.required],
-    status: ['active'],
+    status: ['active', Validators.required],
     totalFee: [{ value: 0, disabled: true }],
     paidAmount: [0],
-    enrollmentDateStr: [new Date().toISOString().split('T')[0]],
-    address: ['']
+    enrollmentDateStr: [new Date().toISOString().split('T')[0], Validators.required],
+    address: ['', Validators.required]
   });
 
   pendingFeeCount = computed(() => this.data.students().filter(s => s.paidAmount < s.totalFee).length);
@@ -106,7 +106,7 @@ export class StudentsComponent {
   saveStudent() {
     if (this.studentForm.invalid) {
       this.studentForm.markAllAsTouched();
-      this.toast.error('Name and email are required.');
+      this.toast.error('Please fill all required fields before enrolling.');
       return;
     }
 
@@ -156,4 +156,12 @@ export class StudentsComponent {
     return m[status] ?? 'badge-secondary';
   }
   initials(name: string) { return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2); }
+
+  ngOnDestroy() {
+    // Reset signals to prevent memory leaks
+    this.modalOpen.set(false);
+    this.editing.set(false);
+    this.editId.set('');
+    this.deleteTarget.set(null);
+  }
 }

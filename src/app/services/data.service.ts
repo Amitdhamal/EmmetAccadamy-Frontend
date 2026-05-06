@@ -8,6 +8,7 @@ export class DataService {
   constructor(private http: HttpClient) {
     this.getAllstudents();
     this.getAllcourses();
+    this.getAllbatches();
   }
   // ===========================
   // NOTICES
@@ -161,27 +162,12 @@ export class DataService {
     this.http.post<Student | any>(`${environment.baseUrl}students`, payload).subscribe({
       next: res => {
         console.log('Student added successfully:', res);
-        const createdStudent = res;
-        console.log('Created student object:', createdStudent);
+        const createdStudent = res.data ?? res;
 
-        if (createdStudent && (createdStudent._id || createdStudent._id)) {
+        if (createdStudent && (createdStudent._id || createdStudent.id)) {
           this._students.update(list => [createdStudent, ...list]);
-          
-          // Increase enrolled count for the batch
-          if (createdStudent.course) {
-            let selectedCourseid = this._courses().find(c => c.title === createdStudent.course)?._id;
-            if (selectedCourseid) {
-              this.updateCourse(selectedCourseid, { enrolledCount: (this._courses().find(c => c._id === selectedCourseid)?.enrolledCount ?? 0) + 1 });
-              this.getAllcourses();
-            }
-            // if (selectedCourse) {
-            //   this._courses.update(list =>
-            //     list.map(c => c.title === createdStudent.course ? { ...c, enrolledCount: c.enrolledCount + 1 } : c)
-            //   );
-            //   this.getAllcourses();
-            // }
-          }
-          
+          this.getAllcourses();
+          this.getAllbatches();
           return;
         }
 
@@ -240,13 +226,15 @@ export class DataService {
   private _courses = signal<Course[]>([]);
 
   getAllcourses() {
-    this.http.get<any>(`${environment.baseUrl}courses`).subscribe((res) => {
+    this.http.get<any>(`${environment.baseUrl}courses`).subscribe(async(res) => {
       console.log('Fetched courses from API:', res);
-      let data = res.data.map((s: any) => ({
+      let data = await res.data.map((s: any) => ({
         ...s
       }))
+      console.log('data',data)
       this._courses.set(data);
     });
+    console.log(this._courses())
   }
 
   readonly courses = this._courses.asReadonly();
@@ -300,7 +288,7 @@ export class DataService {
       payload.startDate = payload.startDate.toISOString();
     }
 
-    this.http.put<any>(`${environment.baseUrl}courses/${id}`, payload).subscribe({
+    this.http.patch<any>(`${environment.baseUrl}courses/${id}`, payload).subscribe({
       next: res => {
         console.log('Course updated successfully:', res);
         const updatedCourse = res?.data ?? res;
@@ -331,41 +319,89 @@ export class DataService {
   // ===========================
   // BATCHES
   // ===========================
-  private _batches = signal<Batch[]>([
-    {
-      id: 'b1', name: 'FS-Jan-2025', courseId: 'c1', courseName: 'Full Stack Development',
-      startDate: new Date('2025-01-15'), endDate: new Date('2025-05-15'),
-      timing: '10:00 AM – 1:00 PM', instructor: 'Amit Joshi',
-      room: 'Lab 1', capacity: 30, enrolled: 24, status: 'ongoing', createdAt: new Date('2025-01-01')
-    },
-    {
-      id: 'b2', name: 'FE-Jan-2025', courseId: 'c2', courseName: 'Frontend Development',
-      startDate: new Date('2025-01-10'), endDate: new Date('2025-04-10'),
-      timing: '2:00 PM – 5:00 PM', instructor: 'Priya Sharma',
-      room: 'Lab 2', capacity: 25, enrolled: 18, status: 'ongoing', createdAt: new Date('2025-01-01')
-    },
-    {
-      id: 'b3', name: 'FS-Feb-2025', courseId: 'c1', courseName: 'Full Stack Development',
-      startDate: new Date('2025-02-10'), endDate: new Date('2025-06-10'),
-      timing: '6:00 PM – 9:00 PM', instructor: 'Amit Joshi',
-      room: 'Lab 1', capacity: 30, enrolled: 5, status: 'upcoming', createdAt: new Date('2025-01-20')
-    }
-  ]);
+  private _batches = signal<Batch[]>([]);
 
   readonly batches = this._batches.asReadonly();
+ 
 
-  addBatch(batch: Omit<Batch, 'id' | 'createdAt'>): Batch {
-    const newBatch: Batch = { ...batch, id: this.genId('b'), createdAt: new Date() };
-    this._batches.update(list => [newBatch, ...list]);
-    return newBatch;
+  private normalizeBatch(raw: any): Batch {
+    return {
+      id: raw._id ?? raw.id,
+      name: raw.name,
+      courseId: raw.courseId,
+      courseName: raw.courseName,
+      startDate: raw.startDate ? new Date(raw.startDate) : new Date(),
+      endDate: raw.endDate ? new Date(raw.endDate) : new Date(),
+      timing: raw.timing,
+      instructor: raw.instructor,
+      room: raw.room,
+      capacity: raw.capacity,
+      enrolled: raw.enrolled,
+      status: raw.status,
+      createdAt: raw.createdAt ? new Date(raw.createdAt) : new Date()
+    };
+  }
+
+  getAllbatches() {
+    this.http.get<any>(`${environment.baseUrl}batches`).subscribe((res) => {
+      console.log('Fetched batches from API:', res);
+      const data = (res.data ?? []).map((s: any) => this.normalizeBatch(s));
+      this._batches.set(data);
+    });
+  }
+
+  addBatch(batch: Omit<Batch, 'id' | 'createdAt'>): void {
+    const payload: any = { ...batch };
+    if (payload.startDate instanceof Date) {
+      payload.startDate = payload.startDate.toISOString();
+    }
+    if (payload.endDate instanceof Date) {
+      payload.endDate = payload.endDate.toISOString();
+    }
+
+    this.http.post<Batch | any>(`${environment.baseUrl}batches`, payload).subscribe({
+      next: res => {
+        console.log('Batch added successfully:', res);
+        const createdBatch = this.normalizeBatch(res.data ?? res);
+        if (createdBatch && createdBatch.id) {
+          this._batches.update(list => [createdBatch, ...list]);
+          return;
+        }
+        this.getAllbatches();
+      },
+      error: err => {
+        console.log('Batch add failed:', err);
+      }
+    });
   }
 
   updateBatch(id: string, updates: Partial<Batch>): void {
-    this._batches.update(list => list.map(b => b.id === id ? { ...b, ...updates } : b));
+    this.http.patch<any>(`${environment.baseUrl}batches/${id}`, updates).subscribe({
+      next: res => {
+        console.log('Batch updated successfully:', res);
+        const updatedBatch = res?.data ?? res;
+        if (updatedBatch && (updatedBatch._id || updatedBatch.id)) {
+          this._batches.update(list =>
+            list.map(b => b.id === id ? { ...b, ...updatedBatch } : b)
+          );
+        }
+      },
+      error: err => {
+        console.log('Batch update failed:', err);
+      }
+    });
   }
 
   deleteBatch(id: string): void {
-    this._batches.update(list => list.filter(b => b.id !== id));
+    this.http.delete<any>(`${environment.baseUrl}batches/${id}`).subscribe({
+      next: res => {
+        console.log('Batch deleted successfully:', res);
+        this._batches.update(list => list.filter(b => b.id !== id));
+      },
+      error: err => {
+        console.log('Batch delete failed:', err);
+      }
+    });
   }
 
   // Dashboard stats

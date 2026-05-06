@@ -168,8 +168,8 @@
             </label>
           </form>
           <div class="modal-footer">
-            <button class="btn btn-secondary" (click)="closeModalDirect()">Cancel</button>
-            <button class="btn btn-primary" (click)="saveStaff()">
+            <button type="button" class="btn btn-secondary" (click)="closeModalDirect()">Cancel</button>
+            <button type="button" class="btn btn-primary" (click)="saveStaff()">
               <span class="material-icons">save</span> {{ editing() ? 'Update' : 'Add Staff' }}
             </button>
           </div>

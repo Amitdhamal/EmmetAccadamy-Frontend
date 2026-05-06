@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { DataService } from '../../services/data.service';
@@ -13,7 +13,7 @@ import { Course } from '../../models/models';
   templateUrl:'./courses.component.html',
   styleUrls: ['./courses.component.scss']
 })
-export class CoursesComponent  implements OnInit {
+export class CoursesComponent  implements OnInit ,OnDestroy{
   data = inject(DataService);
   toast = inject(ToastService);
   auth = inject(AuthService);
@@ -131,6 +131,7 @@ export class CoursesComponent  implements OnInit {
       this.data.addCourse(basePayload);
       this.toast.success('Course added!');
     }
+    this.data.getAllcourses();
     this.closeModalDirect();
   }
   oninptChange(){
@@ -148,4 +149,12 @@ export class CoursesComponent  implements OnInit {
 
   getCatColor(cat: string) { const m: Record<string,string> = { frontend: 'info', backend: 'warning', fullstack: 'success', devops: 'danger', mobile: 'secondary' }; return m[cat] ?? 'secondary'; }
   getStatusColor(s: string) { const m: Record<string,string> = { active: 'success', upcoming: 'warning', completed: 'info', draft: 'secondary' }; return m[s] ?? 'secondary'; }
+
+  ngOnDestroy(): void {
+    // Reset signals to prevent memory leaks
+    this.modalOpen.set(false);
+    this.editing.set(false);
+    this.editId.set('');
+    this.deleteTarget.set(null);
+  }
 }

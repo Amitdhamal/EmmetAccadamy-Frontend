@@ -67,6 +67,25 @@ export class AuthService {
     return { success: true, message: 'Login successful!' };
   }
 
+  register(name: string, email: string, password: string, role: 'staff' | 'student' = 'student'): { success: boolean; message: string } {
+    const existing = this.users.find(u => u.email.toLowerCase() === email.toLowerCase());
+    if (existing) return { success: false, message: 'Email is already registered.' };
+
+    const newUser: User = {
+      id: `u${Date.now()}`,
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
+      password,
+      role,
+      avatar: '',
+      createdAt: new Date(),
+      isActive: true
+    };
+
+    this.users.push(newUser);
+    return { success: true, message: 'Registration successful. Please sign in.' };
+  }
+
   logout(): void {
     this._authState.set({ user: null, isLoggedIn: false });
     localStorage.removeItem(this.STORAGE_KEY);

@@ -1,0 +1,108 @@
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  padding: 20px;
+}
+
+.bg-grid {
+  position: absolute; inset: 0;
+  background-image: linear-gradient(var(--navy-border) 1px, transparent 1px),
+                    linear-gradient(90deg, var(--navy-border) 1px, transparent 1px);
+  background-size: 60px 60px;
+  opacity: 0.25;
+}
+
+.bg-glow {
+  position: absolute;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(255,107,43,0.12) 0%, transparent 70%);
+  top: -100px; right: -100px;
+  pointer-events: none;
+}
+
+.login-container {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.brand { text-align: center; }
+
+.brand-icon {
+  width: 60px; height: 60px;
+  background: var(--orange);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  box-shadow: var(--shadow-orange);
+}
+
+.brand-icon .material-icons { font-size: 32px !important; color: #fff; }
+
+.brand h1 { font-size: 32px; letter-spacing: -0.5px; }
+
+.brand p { color: var(--white-dim); font-size: 14px; margin-top: 4px; }
+
+.login-card { width: 100%; }
+
+.login-card h2 { font-size: 22px; margin-bottom: 4px; }
+
+.subtitle { font-size: 14px; margin-bottom: 20px; }
+
+.pwd-toggle {
+  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; color: var(--white-dim); cursor: pointer;
+  padding: 2px; display: flex;
+}
+
+.error-msg {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(255,77,109,0.1); border: 1px solid rgba(255,77,109,0.3);
+  color: var(--danger); border-radius: var(--radius-sm); padding: 10px 14px;
+  font-size: 14px; margin-bottom: 16px;
+}
+
+.spinner {
+  width: 18px; height: 18px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.footer-note { font-size: 12px; }
+
+.btn[disabled] { opacity: 0.6; cursor: not-allowed; }
+
+.register-cta {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  color: var(--white-dim);
+  font-size: 13px;
+}
+
+.register-cta a {
+  color: var(--orange);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.register-cta a:hover {
+  text-decoration: underline;
+}

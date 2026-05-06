@@ -1,0 +1,72 @@
+<div class="login-page">
+  <div class="bg-grid"></div>
+  <div class="bg-glow"></div>
+
+  <div class="login-container">
+    <div class="brand">
+      <div class="brand-icon">
+        <span class="material-icons">person_add</span>
+      </div>
+      <h1>Emmet<span class="text-orange">Academy</span></h1>
+      <p>Register a new user account</p>
+    </div>
+
+    <div class="login-card card">
+      <h2>Create Account</h2>
+      <p class="subtitle text-dim">Sign up to access the Emmet Academy portal</p>
+
+      <form [formGroup]="registerForm" (ngSubmit)="onRegister()">
+        <div class="form-group">
+          <label>Full Name</label>
+          <input class="form-control" type="text" formControlName="name" placeholder="Your full name">
+        </div>
+
+        <div class="form-group">
+          <label>Email Address</label>
+          <input class="form-control" type="email" formControlName="email" placeholder="you@emmetacademy.in">
+        </div>
+
+        <div class="form-group">
+          <label>Password</label>
+          <div style="position:relative">
+            <input class="form-control" [type]="showPwd() ? 'text' : 'password'" formControlName="password" placeholder="••••••••">
+            <button class="pwd-toggle" type="button" (click)="showPwd.set(!showPwd())">
+              <span class="material-icons">{{ showPwd() ? 'visibility_off' : 'visibility' }}</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Role</label>
+          <select class="form-control" formControlName="role">
+            <option value="student">Student</option>
+            <option value="staff">Staff</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Confirm Password</label>
+          <input class="form-control" [type]="showPwd() ? 'text' : 'password'" formControlName="confirmPassword" placeholder="••••••••">
+        </div>
+
+        @if (error()) {
+          <div class="error-msg">
+            <span class="material-icons">error_outline</span> {{ error() }}
+          </div>
+        }
+
+        <button class="btn btn-primary w-full" type="submit" [disabled]="loading()">
+          @if (loading()) { <span class="spinner"></span> Registering… }
+          @else { <span class="material-icons">person_add</span> Register }
+        </button>
+      </form>
+
+      <div class="register-cta">
+        <span>Already have an account?</span>
+        <a routerLink="/login">Sign in instead</a>
+      </div>
+    </div>
+
+    <p class="footer-note text-dim">© {{getfullYear()}} EmmetAcademy  — Pimpri, Maharashtra</p>
+  </div>
+</div>

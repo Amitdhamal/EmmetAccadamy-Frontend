@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { DataService } from '../../services/data.service';
@@ -12,7 +12,7 @@ import { Staff } from '../../models/models';
   templateUrl:'./staff.component.html',
   styleUrls: ['./staff.component.scss']
 })
-export class StaffComponent implements OnInit {
+export class StaffComponent implements OnInit ,OnDestroy{
   data = inject(DataService);
   toast = inject(ToastService);
   fb = inject(FormBuilder);
@@ -156,4 +156,12 @@ export class StaffComponent implements OnInit {
   }
 
   initials(name: string) { return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2); }
+
+  ngOnDestroy(): void {
+    // Reset signals to prevent memory leaks
+    this.modalOpen.set(false);
+    this.editing.set(false);
+    this.editId.set('');
+    this.deleteTarget.set(null);
+  }
 }

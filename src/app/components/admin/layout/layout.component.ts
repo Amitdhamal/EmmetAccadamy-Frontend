@@ -1,4 +1,4 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, signal, inject, OnDestroy } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../services/auth.service';
@@ -18,7 +18,7 @@ interface NavItem {
   templateUrl:'./layout.component.html',
   styleUrls: ['./layout.component.scss']
 })
-export class LayoutComponent {
+export class LayoutComponent implements OnDestroy {
   auth = inject(AuthService);
   sidebarOpen = signal(false);
   role = 'User';
@@ -38,4 +38,9 @@ export class LayoutComponent {
     { path: 'courses', icon: 'menu_book', label: 'Courses' },
     { path: 'batches', icon: 'group_work', label: 'Batches' },
   ];
+
+  ngOnDestroy(): void {
+    // Reset sidebar state to prevent memory leaks
+    this.sidebarOpen.set(false);
+  }
 }

@@ -151,8 +151,8 @@
           </form>
 
           <div class="modal-footer">
-            <button class="btn btn-secondary" (click)="closeModalDirect()">Cancel</button>
-            <button class="btn btn-primary" (click)="saveNotice()">
+            <button type="button" class="btn btn-secondary" (click)="closeModalDirect()">Cancel</button>
+            <button type="button" class="btn btn-primary" (click)="saveNotice()">
               <span class="material-icons">{{ editing() ? 'save' : 'send' }}</span>
               {{ editing() ? 'Update' : 'Publish' }}
             </button>

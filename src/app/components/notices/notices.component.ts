@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { DataService } from '../../services/data.service';
@@ -13,7 +13,7 @@ import { Notice } from '../../models/models';
   templateUrl: './notices.component.html',
   styleUrls: ['notices.component.scss']
 })
-export class NoticesComponent {
+export class NoticesComponent implements OnDestroy {
   data = inject(DataService);
   toast = inject(ToastService);
   auth = inject(AuthService);
@@ -148,5 +148,13 @@ export class NoticesComponent {
   getCatColor(cat: string): string {
     const m: Record<string, string> = { general: 'secondary', exam: 'warning', holiday: 'success', event: 'info', urgent: 'danger', fee: 'warning' };
     return m[cat] ?? 'secondary';
+  }
+
+  ngOnDestroy(): void {
+    // Reset signals to prevent memory leaks
+    this.modalOpen.set(false);
+    this.editing.set(false);
+    this.editId.set('');
+    this.deleteTarget.set(null);
   }
 }

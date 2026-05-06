@@ -30,14 +30,14 @@ export class BatchesComponent {
     name: ['', Validators.required],
     courseId: ['', Validators.required],
     courseName: [''],
-    instructor: [''],
+    instructor: ['', Validators.required],
     room: ['Lab 1'],
-    startDateStr: [''],
-    endDateStr: [''],
-    timing: [''],
-    capacity: [30],
+    startDateStr: ['', Validators.required],
+    endDateStr: ['', Validators.required],
+    timing: ['', Validators.required],
+    capacity: [30, Validators.required],
     enrolled: [0],
-    status: ['upcoming']
+    status: ['upcoming', Validators.required]
   });
 
   filteredBatches = computed(() => {
@@ -101,7 +101,7 @@ export class BatchesComponent {
 
   saveBatch() {
     if (this.batchForm.invalid) {
-      this.toast.error('Name and course are required.');
+      this.toast.error('Please fill all required batch fields.');
       return;
     }
 
