@@ -59,36 +59,36 @@
             </tr>
           </thead>
           <tbody>
-            @for (s of filteredStaff(); track s.id) {
+            @for (staff of filteredStaff(); track staff._id) {
               <tr>
                 <td>
                   <div style="display:flex;align-items:center;gap:10px">
-                    <div class="mini-avatar">{{ initials(s.name) }}</div>
+                    <div class="mini-avatar">{{ initials(staff.name) }}</div>
                     <div>
-                      <div style="font-weight:500">{{ s.name }}</div>
-                      <div style="font-size:12px;color:var(--white-dim)">{{ s.email }}</div>
+                      <div style="font-weight:500">{{ staff.name }}</div>
+                      <div style="font-size:12px;color:var(--white-dim)">{{ staff.email }}</div>
                     </div>
                   </div>
                 </td>
-                <td><span class="badge badge-info">{{ s.role | titlecase }}</span></td>
-                <td><span class="badge badge-secondary">{{ s.department | titlecase }}</span></td>
-                <td style="font-size:13px">{{ s.phone }}</td>
-                <td>₹{{ s.salary | number }}</td>
-                <td style="font-size:13px">{{ s.joiningDate | date:'MMM d, y' }}</td>
+                <td><span class="badge badge-info">{{ staff.role | titlecase }}</span></td>
+                <td><span class="badge badge-secondary">{{ staff.department | titlecase }}</span></td>
+                <td style="font-size:13px">{{ staff.phone }}</td>
+                <td>₹{{ staff.salary | number }}</td>
+                <td style="font-size:13px">{{ staff.joiningDate | date:'MMM d, y' }}</td>
                 <td>
-                  <span class="badge" [class]="s.isActive ? 'badge-success' : 'badge-danger'">
-                    {{ s.isActive ? 'Active' : 'Inactive' }}
+                  <span class="badge" [class]="staff.isActive ? 'badge-success' : 'badge-danger'">
+                    {{ staff.isActive ? 'Active' : 'Inactive' }}
                   </span>
                 </td>
                 <td>
                   <div style="display:flex;gap:6px">
-                    <button class="btn btn-secondary btn-sm btn-icon" (click)="openModal(s)" title="Edit">
+                    <button class="btn btn-secondary btn-sm btn-icon" (click)="openModal(staff)" title="Edit">
                       <span class="material-icons" style="font-size:16px!important">edit</span>
                     </button>
-                    <button class="btn" [class]="s.isActive ? 'btn-warning' : 'btn-success'" style="padding:7px" (click)="toggleStatus(s)" title="Toggle Status">
-                      <span class="material-icons" style="font-size:16px!important">{{ s.isActive ? 'block' : 'check_circle' }}</span>
+                    <button class="btn" [class]="staff.isActive ? 'btn-warning' : 'btn-success'" style="padding:7px" (click)="toggleStatus(staff)" title="Toggle Status">
+                      <span class="material-icons" style="font-size:16px!important">{{ staff.isActive ? 'block' : 'check_circle' }}</span>
                     </button>
-                    <button class="btn btn-danger btn-sm btn-icon" (click)="confirmDelete(s)" title="Delete">
+                    <button class="btn btn-danger btn-sm btn-icon" (click)="confirmDelete(staff)" title="Delete">
                       <span class="material-icons" style="font-size:16px!important">delete</span>
                     </button>
                   </div>

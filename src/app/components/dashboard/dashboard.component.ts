@@ -8,7 +8,7 @@ import { AuthService } from '../../services/auth.service';
   selector: 'app-dashboard',
   standalone: true,
   imports: [CommonModule, RouterLink],
-  templateUrl:'./dashboard.component.html',
+  templateUrl:  './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent {

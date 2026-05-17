@@ -145,7 +145,7 @@
               <div class="form-group">
                 <label>Instructor</label>
                 <select class="form-control" formControlName="instructor">
-                  @for (s of data.activeStaff(); track s.id) {
+                  @for (s of data.activeStaff(); track s._id) {
                     @if (s.role === 'instructor') {
                       <option [value]="s.name">{{ s.name }}</option>
                     }

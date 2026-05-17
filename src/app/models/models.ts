@@ -1,6 +1,6 @@
 // ===== USER / AUTH MODELS =====
 export interface User {
-  id: string;
+  _id: string;
   name: string;
   email: string;
   password: string; // plain text for demo (in prod: hashed)
@@ -17,7 +17,7 @@ export interface AuthState {
 
 // ===== STAFF MODEL =====
 export interface Staff {
-  id: string;
+  _id: string;
   name: string;
   email: string;
   phone: string;
@@ -70,7 +70,7 @@ export interface Course {
 
 // ===== NOTICE MODEL =====
 export interface Notice {
-  id: string;
+  _id: string;
   title: string;
   content: string;
   category: 'general' | 'exam' | 'holiday' | 'event' | 'urgent' | 'fee';

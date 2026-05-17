@@ -88,7 +88,7 @@ export class CoursesComponent  implements OnInit ,OnDestroy{
   closeModal(e: Event) { if (e.target === e.currentTarget) this.closeModalDirect(); }
   closeModalDirect() { this.modalOpen.set(false); }
 
-  saveCourse() {
+  async saveCourse() {
     if (this.courseForm.invalid) {
       this.courseForm.markAllAsTouched();
       this.toast.error('Title and code are required.');
@@ -125,13 +125,12 @@ export class CoursesComponent  implements OnInit ,OnDestroy{
     };
 
     if (this.editing()) {
-      this.data.updateCourse(this.editId(), basePayload);
+      await this.data.updateCourse(this.editId(), basePayload);
       this.toast.success('Course updated!');
     } else {
-      this.data.addCourse(basePayload);
+      await this.data.addCourse(basePayload);
       this.toast.success('Course added!');
     }
-    this.data.getAllcourses();
     this.closeModalDirect();
   }
   oninptChange(){

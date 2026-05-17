@@ -75,7 +75,7 @@
             <h3 style="font-size:18px">📢 Recent Notices</h3>
             <a routerLink="/notices" class="btn btn-secondary btn-sm">View All</a>
           </div>
-          @for (notice of recentNotices(); track notice.id) {
+          @for (notice of recentNotices(); track notice._id) {
             <div class="notice-item">
               <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
                 <span class="badge badge-{{ getCategoryColor(notice.category) }}">{{ notice.category }}</span>

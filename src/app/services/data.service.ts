@@ -1,139 +1,197 @@
 import { Injectable, signal, computed } from '@angular/core';
-import { Notice, Staff, Student, Course, Batch } from '../models/models';
+import { Notice, Staff, Student, Course, Batch, User } from '../models/models';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class DataService {
+  istoggleStatus = false
   constructor(private http: HttpClient) {
     this.getAllstudents();
     this.getAllcourses();
     this.getAllbatches();
+    this.getAllStaff();
+    this.getAllNotices();
   }
   // ===========================
   // NOTICES
   // ===========================
-  private _notices = signal<Notice[]>([
-    {
-      id: 'n1', title: 'Welcome to EmmetAcademy  Batch 2025!',
-      content: 'We are excited to welcome all new students to the January 2025 batch. Orientation will be held on January 15th at 10 AM. Please bring all required documents and your enrollment receipt.',
-      category: 'general', targetAudience: 'all', postedBy: 'Admin Kumar',
-      isActive: true, isPinned: true,
-      expiryDate: new Date('2025-02-01'), createdAt: new Date('2025-01-10'),
-      updatedAt: new Date('2025-01-10')
-    },
-    {
-      id: 'n2', title: 'React & Angular Module Exam Schedule',
-      content: 'Exams for the React.js and Angular modules will be held on January 25th and 26th respectively. Students are advised to complete all assignments before the exam date. Revision sessions will be conducted on January 22nd and 23rd.',
-      category: 'exam', targetAudience: 'students', postedBy: 'Priya Sharma',
-      isActive: true, isPinned: false,
-      expiryDate: new Date('2025-01-27'), createdAt: new Date('2025-01-12'),
-      updatedAt: new Date('2025-01-12')
-    },
-    {
-      id: 'n3', title: 'Republic Day Holiday — January 26th',
-      content: 'The academy will remain closed on January 26th, 2025 on account of Republic Day. All scheduled classes and sessions will be rescheduled accordingly. Happy Republic Day!',
-      category: 'holiday', targetAudience: 'staff', postedBy: 'Admin Kumar',
-      isActive: true, isPinned: false,
-      createdAt: new Date('2025-01-20'), updatedAt: new Date('2025-01-20')
-    },
-    {
-      id: 'n4', title: 'Fee Submission Deadline — February 5th',
-      content: 'All students are reminded to submit their second installment fees by February 5th, 2025. A late fee of ₹500 will be charged after the due date. Contact the accounts office for any queries.',
-      category: 'fee', targetAudience: 'students', postedBy: 'Admin Kumar',
-      isActive: true, isPinned: true,
-      expiryDate: new Date('2025-02-10'), createdAt: new Date('2025-01-18'),
-      updatedAt: new Date('2025-01-18')
-    },
-    {
-      id: 'n5', title: 'Guest Lecture: Node.js Microservices',
-      content: 'We are pleased to announce a guest lecture by Mr. Ankit Verma, Senior Backend Engineer at Flipkart. Topic: Building Scalable Microservices with Node.js. Date: February 2nd, 2025 at 2 PM. All students and staff are invited.',
-      category: 'event', targetAudience: 'all', postedBy: 'Priya Sharma',
-      isActive: true, isPinned: false,
-      expiryDate: new Date('2025-02-03'), createdAt: new Date('2025-01-22'),
-      updatedAt: new Date('2025-01-22')
-    }
-  ]);
+  private _notices = signal<Notice[]>([]);
+
+  getAllNotices() {
+    this.http.get<any>(`${environment.baseUrl}notices`).subscribe((res) => {
+      console.log('Fetched notices from APIII:', res);
+      res = res.data ?? res;
+      let data = res.map((s: any) => ({
+        ...s,
+        expiryDate: s.expiryDate ? new Date(s.expiryDate) : undefined,
+        createdAt: s.createdAt ? new Date(s.createdAt) : new Date(),
+        updatedAt: s.updatedAt ? new Date(s.updatedAt) : new Date()
+      }));
+      this._notices.set(data);
+      console.log('Notices after setting state:', this._notices());
+    });
+  }
 
   readonly notices = this._notices.asReadonly();
   readonly activeNotices = computed(() => this._notices().filter(n => n.isActive));
   readonly pinnedNotices = computed(() => this._notices().filter(n => n.isPinned && n.isActive));
 
-  addNotice(notice: Omit<Notice, 'id' | 'createdAt' | 'updatedAt'>): Notice {
-    const newNotice: Notice = { ...notice, id: this.genId('n'), createdAt: new Date(), updatedAt: new Date() };
-    this._notices.update(list => [newNotice, ...list]);
-    return newNotice;
+  addNotice(notice: Omit<Notice, '_id' | 'createdAt' | 'updatedAt'>): void {
+    const payload: any = { ...notice };
+    if (payload.expiryDate instanceof Date) {
+      payload.expiryDate = payload.expiryDate.toISOString();
+    }
+    console.log('Sending create notice request', payload);
+    this.http.post<Notice | any>(`${environment.baseUrl}notices`, payload).subscribe({
+      next: res => {
+        console.log('Notice added successfully:', res);
+        const createdNotice = res.data ?? res;
+        if (createdNotice && createdNotice._id) {
+          this._notices.update(list => [createdNotice, ...list]);
+        }
+      },
+      error: err => {
+        console.error('Notice add failed:', err);
+      }
+    });
   }
 
   updateNotice(id: string, updates: Partial<Notice>): void {
-    this._notices.update(list =>
-      list.map(n => n.id === id ? { ...n, ...updates, updatedAt: new Date() } : n)
-    );
+    const payload = { ...updates } as any;
+    if (payload.expiryDate instanceof Date) {
+      payload.expiryDate = payload.expiryDate.toISOString();
+    }
+    this.http.put<any>(`${environment.baseUrl}notices/${id}`, payload).subscribe({
+      next: res => {
+        console.log('Notice updated successfully:', res);
+        const updatedNotice = res?.data ?? res;
+        if (updatedNotice && (updatedNotice._id || updatedNotice.id)) {
+          this._notices.update(list =>
+            list.map(n => n._id === id ? { ...n, ...updatedNotice } : n)
+          );
+        }
+      },
+      error: err => {
+        console.error('Notice update failed:', err);
+      }
+    });
   }
 
   deleteNotice(id: string): void {
-    this._notices.update(list => list.filter(n => n.id !== id));
+    this.http.delete<any>(`${environment.baseUrl}notices/${id}`).subscribe({
+      next: res => {
+        console.log('Notice deleted successfully:', res);
+        this._notices.update(list => list.filter(n => n._id !== id));
+      },
+      error: err => {
+        console.error('Notice delete failed:', err);
+      }
+    });
   }
 
   getNoticeById(id: string): Notice | undefined {
-    return this._notices().find(n => n.id === id);
+    return this._notices().find(n => n._id === id);
   }
 
   // ===========================
   // STAFF
   // ===========================
-  private _staff = signal<Staff[]>([
-    {
-      id: 's1', name: 'Priya Sharma', email: 'priya@emmetacademy.in', phone: '9876543210',
-      role: 'instructor', department: 'frontend', qualification: 'B.Tech Computer Science',
-      joiningDate: new Date('2023-06-01'), salary: 65000, isActive: true,
-      subjects: ['HTML/CSS', 'JavaScript', 'React.js', 'Angular'], createdAt: new Date('2023-06-01')
-    },
-    {
-      id: 's2', name: 'Rohit Desai', email: 'rohit@emmetacademy.in', phone: '9765432109',
-      role: 'instructor', department: 'backend', qualification: 'MCA',
-      joiningDate: new Date('2023-08-15'), salary: 70000, isActive: true,
-      subjects: ['Node.js', 'Express.js', 'MongoDB', 'MySQL'], createdAt: new Date('2023-08-15')
-    },
-    {
-      id: 's3', name: 'Sneha Kulkarni', email: 'sneha@emmetacademy.in', phone: '9654321098',
-      role: 'coordinator', department: 'management', qualification: 'MBA',
-      joiningDate: new Date('2023-09-01'), salary: 45000, isActive: true,
-      subjects: [], createdAt: new Date('2023-09-01')
-    },
-    {
-      id: 's4', name: 'Amit Joshi', email: 'amit@emmetacademy.in', phone: '9543210987',
-      role: 'instructor', department: 'fullstack', qualification: 'B.E. Information Technology',
-      joiningDate: new Date('2024-01-10'), salary: 72000, isActive: true,
-      subjects: ['React.js', 'Node.js', 'TypeScript', 'Docker'], createdAt: new Date('2024-01-10')
-    },
-    {
-      id: 's5', name: 'Meera Nair', email: 'meera@emmetacademy.in', phone: '9432109876',
-      role: 'support', department: 'management', qualification: 'BCA',
-      joiningDate: new Date('2024-03-05'), salary: 30000, isActive: false,
-      subjects: [], createdAt: new Date('2024-03-05')
-    }
-  ]);
+  private _staff = signal<Staff[]>([]);
+
+  getAllStaff() {
+    this.http.get<any>(`${environment.baseUrl}staffs`).subscribe((res) => {
+      console.log('Fetched staff from API:', res);
+      let data = res.data.map((s: any) => ({
+        ...s
+      }));
+      this._staff.set(data);
+      console.log('Staff after setting statessssssss:', this._staff());
+    });
+  }
 
   readonly staff = this._staff.asReadonly();
   readonly activeStaff = computed(() => this._staff().filter(s => s.isActive));
 
-  addStaff(staff: Omit<Staff, 'id' | 'createdAt'>): Staff {
-    const newStaff: Staff = { ...staff, id: this.genId('st'), createdAt: new Date() };
-    this._staff.update(list => [newStaff, ...list]);
-    return newStaff;
+  addStaff(staff: Omit<Staff, '_id' | 'createdAt'>): Staff | any{
+   const payload: any = { ...staff };
+     if (payload.joi instanceof Date) {
+      payload.joiningDateStr = payload.joiningDateStr.toISOString();
+    }
+    this.http.post<Staff | any>(`${environment.baseUrl}staffs`, payload).subscribe({
+      next: res => {
+        console.log('Staff added successfully:', res);
+      },
+      error: err => {
+        console.log('Staff add failed:', err);
+      },
+      complete: () => {
+        this.getAllStaff();
+      }
+    });
   }
 
   updateStaff(id: string, updates: Partial<Staff>): void {
-    this._staff.update(list => list.map(s => s.id === id ? { ...s, ...updates } : s));
+    const payload = { ...updates } as any;
+    if (payload.joiningDateStr instanceof Date) {
+      payload.joiningDateStr = payload.joiningDateStr.toISOString();
+    }
+    this.http.patch<Staff | any>(`${environment.baseUrl}staffs/${id}`, payload).subscribe({
+      next: res => {
+        console.log('Staff updated successfully:', res);
+        const updatedStaff = res?.data ?? res;
+        if (updatedStaff && (updatedStaff.id || updatedStaff._id)) {
+          this._staff.update(list =>
+            list.map(s => s._id === id ? { ...s, ...updatedStaff } : s)
+          );
+        } else {
+          this.getAllStaff();
+        }
+      },
+      error: err => {
+        console.log('Staff update failed:', err);
+      }
+    });
   }
 
   deleteStaff(id: string): void {
-    this._staff.update(list => list.filter(s => s.id !== id));
+    this.http.delete<any>(`${environment.baseUrl}staffs/${id}`).subscribe({
+      next: res => {
+        console.log('Staff deleted successfully:', res);
+        this._staff.update(list => list.filter(s => s._id !== id));
+      },
+      error: err => {
+        console.log('Staff delete failed:', err);
+      }
+    });
+    this.getAllStaff();
+  }
+
+  getAllusers() {
+    this.http.get<any>(`${environment.baseUrl}users`).subscribe((res) => {
+      console.log('Fetched users from API:', res);
+      let data = res.data.map((s: any) => ({
+        ...s
+      }));
+      this._users.set(data);
+    });
+  }
+  private _users = signal<User[]>([]);
+  updateuser(id: string, updates: Partial<User>): void {
+    const payload = { ...updates } as any;
+    this.http.patch<any>(`${environment.baseUrl}users/${id}/${this.istoggleStatus}`, payload).subscribe({
+      next: res => {
+        console.log('User updated successfully:', res);
+      },
+      error: err => {
+        console.log('User update failed:', err);
+      }
+    });
+    this.istoggleStatus = false
   }
 
   getStaffById(id: string): Staff | undefined {
-    return this._staff().find(s => s.id === id);
+    return this._staff().find(s => s._id === id);
   }
 
   // ===========================
@@ -155,9 +213,6 @@ export class DataService {
 
   addStudent(student: Omit<Student, '_id' | 'createdAt'>): void {
     const payload: any = { ...student };
-    if (payload.enrollmentDate instanceof Date) {
-      payload.enrollmentDate = payload.enrollmentDate.toISOString();
-    }
 
     this.http.post<Student | any>(`${environment.baseUrl}students`, payload).subscribe({
       next: res => {
@@ -168,15 +223,16 @@ export class DataService {
           this._students.update(list => [createdStudent, ...list]);
           this.getAllcourses();
           this.getAllbatches();
+          this.getAllstudents();
           return;
         }
 
-        this.getAllstudents();
       },
       error: err => {
         console.log('Student add failed:', err);
       }
     });
+
   }
 
   updateStudent(id: string, updates: Partial<Student>): void {
@@ -297,6 +353,7 @@ export class DataService {
             list.map(c => c._id === id ? { ...c, ...updatedCourse } : c)
           );
         }
+        this.getAllcourses();
       },
       error: err => {
         console.log('Course update failed:', err);

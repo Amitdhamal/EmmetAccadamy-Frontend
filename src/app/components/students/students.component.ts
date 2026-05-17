@@ -4,6 +4,7 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angu
 import { DataService } from '../../services/data.service';
 import { ToastService } from '../../services/toast.service';
 import { Student } from '../../models/models';
+import { AuthService } from 'src/app/services/auth.service';
 
 @Component({
   selector: 'app-students',
@@ -16,6 +17,7 @@ export class StudentsComponent  implements OnDestroy{
   data = inject(DataService);
   toast = inject(ToastService);
   fb = inject(FormBuilder);
+  auth = inject(AuthService);
 
   search = '';
   filterStatus = '';

@@ -10,7 +10,7 @@ export const routes: Routes = [
   },
   {
     path: 'register',
-    canActivate: [guestGuard],
+  canActivate: [guestGuard],
     loadComponent: () => import('./components/register/register.component').then(m => m.RegisterComponent)
   },
   {
@@ -20,7 +20,7 @@ export const routes: Routes = [
     children: [
       { path: 'dashboard', loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent) },
       { path: 'notices', loadComponent: () => import('./components/notices/notices.component').then(m => m.NoticesComponent) },
-      { path: 'staff', canActivate: [adminGuard], loadComponent: () => import('./components/staff/staff.component').then(m => m.StaffComponent) },
+      { path: 'staff', loadComponent: () => import('./components/staff/staff.component').then(m => m.StaffComponent) },
       { path: 'students', loadComponent: () => import('./components/students/students.component').then(m => m.StudentsComponent) },
       { path: 'courses', loadComponent: () => import('./components/courses/courses.component').then(m => m.CoursesComponent) },
       { path: 'batches', loadComponent: () => import('./components/batches/batches.component').then(m => m.BatchesComponent) },

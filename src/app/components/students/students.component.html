@@ -5,11 +5,11 @@
           <h2>🎓 Students</h2>
           <p class="text-dim">Manage enrolled students and track their progress</p>
         </div>
+        @if (auth.isStaff() && auth.isActive()) {
         <button class="btn btn-primary" (click)="openModal()">
           <span class="material-icons">person_add</span> Enroll Student
-        </button>
+        </button>}
       </div>
-
       <!-- Stats -->
       <div class="stats-grid" style="margin-bottom:24px">
         <div class="stat-card">
@@ -56,9 +56,13 @@
               <th>Course</th>
               <th>Batch</th>
               <th>Status</th>
+              @if(auth.isStaff() ||auth.isAdmin()) {
               <th>Fees</th>
+            }
               <th>Enrolled</th>
+              @if(auth.isStaff() ||auth.isAdmin()) {
               <th>Actions</th>
+            }
             </tr>
           </thead>
           <tbody>
@@ -76,6 +80,7 @@
                 <td style="font-size:13px">{{ s.course }}</td>
                 <td><span class="badge badge-info">{{ s.batch }}</span></td>
                 <td><span class="badge" [class]="getStatusBadge(s.status)">{{ s.status | titlecase }}</span></td>
+                @if(auth.isStaff() ||auth.isAdmin()) {
                 <td>
                   <div style="font-size:13px">
                     <span [class]="s.paidAmount >= s.totalFee ? 'text-success' : 'text-danger'">
@@ -88,17 +93,20 @@
                          [style.background]="s.paidAmount >= s.totalFee ? 'var(--success)' : 'var(--orange)'"></div>
                   </div>
                 </td>
+              }
                 <td style="font-size:13px">{{ s.enrollmentDate | date:'MMM d, y' }}</td>
-                <td>
-                  <div style="display:flex;gap:6px">
-                    <button class="btn btn-secondary btn-sm btn-icon" (click)="openModal(s)">
-                      <span class="material-icons" style="font-size:16px!important">edit</span>
-                    </button>
-                    <button class="btn btn-danger btn-sm btn-icon" (click)="confirmDelete(s)">
+                @if(auth.isStaff() ||auth.isAdmin()) {
+                  <td>
+                    <div style="display:flex;gap:6px">
+                      <button class="btn btn-secondary btn-sm btn-icon" (click)="openModal(s)">
+                        <span class="material-icons" style="font-size:16px!important">edit</span>
+                      </button>
+                        <button class="btn btn-danger btn-sm btn-icon" (click)="confirmDelete(s)">
                       <span class="material-icons" style="font-size:16px!important">delete</span>
                     </button>
                   </div>
                 </td>
+                }
               </tr>
             }
             @if (filteredStudents().length === 0) {

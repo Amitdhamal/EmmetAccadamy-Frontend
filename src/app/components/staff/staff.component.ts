@@ -81,7 +81,7 @@ export class StaffComponent implements OnInit ,OnDestroy{
   openModal(staff?: Staff) {
     if (staff) {
       this.editing.set(true);
-      this.editId.set(staff.id);
+      this.editId.set(staff._id);
       this.staffForm.reset({
         name: staff.name,
         email: staff.email,
@@ -146,13 +146,15 @@ export class StaffComponent implements OnInit ,OnDestroy{
   }
 
   toggleStatus(s: Staff) {
-    this.data.updateStaff(s.id, { isActive: !s.isActive });
+    this.data.istoggleStatus = true
+    this.data.updateStaff(s._id, { isActive: !s.isActive });
+    this.data.updateuser(s._id, { isActive: !s.isActive })
     this.toast.info(s.isActive ? `${s.name} deactivated.` : `${s.name} activated.`);
   }
 
   confirmDelete(s: Staff) { this.deleteTarget.set(s); }
   doDelete() {
-    if (this.deleteTarget()) { this.data.deleteStaff(this.deleteTarget()!.id); this.toast.success('Staff removed.'); this.deleteTarget.set(null); }
+    if (this.deleteTarget()) { this.data.deleteStaff(this.deleteTarget()!._id); this.toast.success('Staff removed.'); this.deleteTarget.set(null); }
   }
 
   initials(name: string) { return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2); }

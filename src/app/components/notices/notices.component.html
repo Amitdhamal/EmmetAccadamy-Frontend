@@ -4,7 +4,7 @@
           <h2>📢 Notice Board</h2>
           <p class="text-dim">Manage and publish notices for students and staff</p>
         </div>
-        @if (auth.isAdmin()) {
+        @if (auth.isAdmin()|| auth.isStaff()) {
           <button class="btn btn-primary" (click)="openModal()">
             <span class="material-icons">add</span> Post Notice
           </button>
@@ -35,7 +35,7 @@
       @if (pinnedNotices().length > 0) {
         <div class="pinned-section">
           <div class="section-title"><span class="material-icons" style="color:var(--orange)">push_pin</span> Pinned</div>
-          @for (notice of pinnedNotices(); track notice.id) {
+          @for (notice of pinnedNotices(); track notice._id) {
             <div class="notice-card pinned">
               <ng-container *ngTemplateOutlet="noticeCard; context: {notice: notice}"></ng-container>
             </div>
@@ -45,7 +45,7 @@
 
       <!-- All notices -->
       <div class="notices-list">
-        @for (notice of filteredNotices(); track notice.id) {
+        @for (notice of filteredNotices(); track notice._id) {
           @if (!notice.isPinned) {
             <div class="notice-card">
               <ng-container *ngTemplateOutlet="noticeCard; context: {notice: notice}"></ng-container>

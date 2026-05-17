@@ -3,6 +3,7 @@ import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { ToastService } from '../../services/toast.service';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-register',
@@ -16,6 +17,7 @@ export class RegisterComponent implements OnInit{
   private toast = inject(ToastService);
   private router = inject(Router);
   private fb = inject(FormBuilder);
+  private http = inject(HttpClient);
   getfullYear() {
     return new Date().getFullYear();
   }
@@ -51,16 +53,22 @@ export class RegisterComponent implements OnInit{
     }
 
     this.loading.set(true);
-    setTimeout(() => {
-      const role = (this.registerForm.value.role as 'staff' | 'student') ?? 'student';
-      const result = this.auth.register(name ?? '', email ?? '', password ?? '', role);
-      this.loading.set(false);
-      if (result.success) {
-        this.toast.success(result.message);
-        this.router.navigate(['/login']);
-      } else {
-        this.error.set(result.message);
+    const role = (this.registerForm.value.role as 'staff' | 'student') ?? 'student';
+    this.auth.register(name ?? '', email ?? '', password ?? '', role).subscribe({
+      next: (res: any) => {
+        this.loading.set(false);
+        if (res?.status === 'success') {
+          this.toast.success(res.message || 'Registration successful!');
+          this.router.navigate(['/login']);
+        } else {
+          this.error.set(res?.message || 'Registration failed.');
+        }
+      },
+      error: (err: any) => {
+        this.loading.set(false);
+        console.error('Registration failed:', err);
+        this.error.set(err?.error?.error || 'Registration failed. Please try again.');
       }
-    }, 600);
+    });
   }
 }

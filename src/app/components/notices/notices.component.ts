@@ -43,6 +43,7 @@ export class NoticesComponent implements OnDestroy {
 
   filteredNotices = computed(() => {
     let notices = this.data.notices();
+    console.log('noticessssssssss', notices);
     // if (this.search) {
     //   const s = this.search.toLowerCase();
     //   notices = notices.filter(n => n.title.toLowerCase().includes(s) || n.content.toLowerCase().includes(s));
@@ -59,7 +60,7 @@ export class NoticesComponent implements OnDestroy {
   openModal(notice?: Notice) {
     if (notice) {
       this.editing.set(true);
-      this.editId.set(notice.id);
+      this.editId.set(notice._id);
       this.noticeForm.reset({
         title: notice.title,
         content: notice.content,
@@ -132,14 +133,14 @@ export class NoticesComponent implements OnDestroy {
   }
 
   togglePin(notice: Notice) {
-    this.data.updateNotice(notice.id, { isPinned: !notice.isPinned });
+    this.data.updateNotice(notice._id, { isPinned: !notice.isPinned });
     this.toast.info(notice.isPinned ? 'Notice unpinned.' : 'Notice pinned!');
   }
 
   confirmDelete(notice: Notice) { this.deleteTarget.set(notice); }
   doDelete() {
     if (this.deleteTarget()) {
-      this.data.deleteNotice(this.deleteTarget()!.id);
+      this.data.deleteNotice(this.deleteTarget()!._id);
       this.toast.success('Notice deleted.');
       this.deleteTarget.set(null);
     }
